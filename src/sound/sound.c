@@ -21,6 +21,7 @@
 #include "sound_sb_dsp.h"
 #include "sound_wss.h"
 #include "sound_mmb.h"
+#include "sound_csm.h"
 
 #include "timer.h"
 #include "thread.h"
@@ -52,6 +53,7 @@ SOUND_CARD sc_pas16 = {"Pro Audio Spectrum 16", "pas16", &pas16_device};
 SOUND_CARD sc_es1371 = {"Ensoniq AudioPCI (ES1371)", "es1371", &es1371_device};
 SOUND_CARD sc_sbpci128 = {"Sound Blaster PCI 128", "sbpci128", &es1371_device};
 SOUND_CARD sc_mmb = {"Mindscape Music Board", "mmb", &mmb_device};
+SOUND_CARD sc_csm = {"Covox Sound Master", "csm", &csm_device};
 
 int sound_card_available(int card) {
         if (sound_cards[card] != NULL && sound_cards[card]->device != NULL)
@@ -287,4 +289,5 @@ void sound_init_builtin() {
         pcem_add_sound(&sc_es1371);
         pcem_add_sound(&sc_sbpci128);
         pcem_add_sound(&sc_mmb);
+        pcem_add_sound(&sc_csm);
 }

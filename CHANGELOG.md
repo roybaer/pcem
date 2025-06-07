@@ -28,6 +28,7 @@
 
 ## Added the following Sound Cards to v18
 - Mindscape Music Board
+- Covox Sound Master
 
 ## Developer Changes to v18
 - First release to switch from autotools/make to CMake/Ninja

@@ -14,6 +14,7 @@ set(PCEM_PRIVATE_API ${PCEM_PRIVATE_API}
         ${CMAKE_SOURCE_DIR}/includes/private/sound/sound_audiopci.h
         ${CMAKE_SOURCE_DIR}/includes/private/sound/sound_azt2316a.h
         ${CMAKE_SOURCE_DIR}/includes/private/sound/sound_cms.h
+        ${CMAKE_SOURCE_DIR}/includes/private/sound/sound_csm.h
         ${CMAKE_SOURCE_DIR}/includes/private/sound/sound_dbopl.h
         ${CMAKE_SOURCE_DIR}/includes/private/sound/sound_emu8k.h
         ${CMAKE_SOURCE_DIR}/includes/private/sound/sound_gus.h
@@ -42,6 +43,7 @@ set(PCEM_SRC ${PCEM_SRC}
         sound/sound_audiopci.c
         sound/sound_azt2316a.c
         sound/sound_cms.c
+        sound/sound_csm.c
         sound/sound_dbopl.cc
         sound/sound_emu8k.c
         sound/sound_gus.c
