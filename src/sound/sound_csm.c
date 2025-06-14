@@ -56,7 +56,7 @@ void csm_write(uint16_t addr, uint8_t data, void *p) {
 
         csm_update(csm);
 
-        switch (addr & 0x20) {
+        switch (addr & 0x1f) {
                 case 0:
                         csm->psg.index = data;
                         break;
