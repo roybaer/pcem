@@ -59,8 +59,12 @@ void csm_write(uint16_t addr, uint8_t data, void *p) {
         switch (addr & 0x1f) {
                 case 0:
                         csm->psg.index = data;
+                        csm->psg.last_written = -1;
                         break;
                 case 1:
+                        if (csm->psg.index <= 15)
+                                csm->psg.last_written = data;
+
                         switch (ay->index) {
                                 case 0:
                                         ay->regs[0] = data;
@@ -98,17 +102,17 @@ void csm_write(uint16_t addr, uint8_t data, void *p) {
                                         csm_mode_bits_changed(csm);
                                         break;
                                 case 8:
-                                        ay->regs[8] = data;
+                                        ay->regs[8] = data & 0x1f;
                                         ayumi_set_volume(&ay->chip, 0, data & 0xf);
                                         ayumi_set_mixer(&ay->chip, 0, ay->regs[7] & 1, (ay->regs[7] >> 3) & 1, (data >> 4) & 1);
                                         break;
                                 case 9:
-                                        ay->regs[9] = data;
+                                        ay->regs[9] = data & 0x1f;
                                         ayumi_set_volume(&ay->chip, 1, data & 0xf);
                                         ayumi_set_mixer(&ay->chip, 1, (ay->regs[7] >> 1) & 1, (ay->regs[7] >> 4) & 1, (data >> 4) & 1);
                                         break;
                                 case 10:
-                                        ay->regs[10] = data;
+                                        ay->regs[10] = data & 0x1f;
                                         ayumi_set_volume(&ay->chip, 2, data & 0xf);
                                         ayumi_set_mixer(&ay->chip, 2, (ay->regs[7] >> 2) & 1, (ay->regs[7] >> 5) & 1, (data >> 4) & 1);
                                         break;
@@ -121,7 +125,7 @@ void csm_write(uint16_t addr, uint8_t data, void *p) {
                                         ayumi_set_envelope(&ay->chip, (ay->regs[12] >> 8) | ay->regs[11]);
                                         break;
                                 case 13:
-                                        ay->regs[13] = data;
+                                        ay->regs[13] = data & 0xf;
                                         ayumi_set_envelope_shape(&ay->chip, data & 0xf);
                                         break;
                                 case 14:
@@ -135,6 +139,7 @@ void csm_write(uint16_t addr, uint8_t data, void *p) {
                         }
                         break;
                 case 2:
+                case 15:
                         csm->pcm_sample = data;
                         break;
                 case 3:
@@ -164,12 +169,20 @@ uint8_t csm_read(uint16_t addr, void *p) {
                                 case 11:
                                 case 12:
                                 case 13:
-                                        return ay->regs[ay->index];
+                                        // YM2149 returns unmasked internal buffer for direct read-after-write
+                                        if (ay->type == 1 && ay->last_written >= 0)
+                                                return ay->last_written;
+                                        else
+                                                return ay->regs[ay->index];
                                 case 14:
                                         return (ay->regs[7] & 0x40) ? ay->regs[14] : 0;
                                 case 15:
                                         // there are pull-up resistors on IOB7..IOB4
                                         return (ay->regs[7] & 0x80) ? ay->regs[15] : 0xf0;
+                                default:
+                                        // PSG data bus should be in high-impedance mode for out-of-bounds
+                                        // register indices => approximate a common effect of a floating bus
+                                        return ay->index;
                         }
                         break;
                 case 4:
@@ -184,10 +197,11 @@ uint8_t csm_read(uint16_t addr, void *p) {
 }
 
 void csm_init(csm_t *csm, uint16_t base, uint16_t size, uint8_t dma, uint8_t irq, int freq, int psg_type) {
-        sound_add_handler(csm_get_buffer, csm);
-
+        csm->psg.type = psg_type;
         ayumi_configure(&csm->psg.chip, psg_type, freq, 48000);
         csm_mode_bits_changed(csm);
+
+        sound_add_handler(csm_get_buffer, csm);
 
         io_sethandler(base, size, csm_read, NULL, NULL, csm_write, NULL, NULL, csm);
 }

@@ -6,6 +6,8 @@
 extern device_t csm_device;
 
 typedef struct ay_3_89x0_t {
+        int type;
+        int last_written;
         uint8_t index;
         uint8_t regs[16];
         struct ayumi chip;
